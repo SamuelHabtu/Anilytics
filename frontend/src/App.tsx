@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import axios from "axios";
+import { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentToken, setToken] = useState();
+  const testApi = async () => {
+    // const data = await axios.get("http://localhost:9090");
+    try {
+      const data = await axios.get(
+        " https://myanimelist.net/v1/oauth2/authorize",
+        {
+          headers: {
+            // "Access-Control-Allow-Origin": "*",
+            //   "Access-Control-Allow-Methods":
+            //     "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+            //   "Access-Control-Allow-Headers": "Origin",
+          },
 
+          params: {
+            client_id: import.meta.env.VITE_CLIENT_ID,
+            state: "State1",
+            code_challenge: import.meta.env.VITE_CRYPTO_CHALLENGE,
+            response_type: import.meta.env.VITE_RESPONSE_TYPE,
+          },
+        }
+      );
+      console.log(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <button onClick={() => testApi()}>Press Me</button>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
