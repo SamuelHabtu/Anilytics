@@ -16,3 +16,7 @@
 
 - Create requirments.txt: `pip freeze > requirements.txt`
 - Install: `pip install -r requirements.txt`
+
+## 2. Run backend
+
+- `fastapi dev main.py`
