@@ -2,8 +2,13 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { CsvToArray } from "./src/csv.js";
-import pgPromise from "pg-promise";
 import dotenv from "dotenv";
+import {
+  watching_status,
+  anime,
+  animelist,
+  rating_complete,
+} from "./src/tables.js";
 dotenv.config();
 
 const config = {
@@ -14,26 +19,15 @@ const config = {
   database: process.env.DB,
 };
 
-const pgp = pgPromise();
-const db = pgp(config);
-const parser = new CsvToArray();
+const parser = new CsvToArray(config, animelist.columns);
 
 try {
-  const data = await parser.read("../data/animelist.csv");
-  const dataJSON = data.map((item) => {
-    return { status: item[0], description: item[1] };
-  });
-  console.log(dataJSON.length);
-  // const insertString = pgp.helpers.insert(
-  //   dataJSON,
-  //   ["status", "description"],
-  //   "watching_status"
-  // );
-  // await db.none(insertString);
+  // await parser.read("../data/animelist.csv", animelist);
 } catch (e) {
   console.log(e);
 }
 
+// console.log(insertString.replace(`'Unknown'`, "NULL"));
 // var app = express();
 // const router = express.Router();
 

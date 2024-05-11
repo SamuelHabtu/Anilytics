@@ -1,15 +1,35 @@
 import { parse } from "csv-parse";
 import { createReadStream } from "node:fs";
+import pgPromise from "pg-promise";
 
 export class CsvToArray {
-  parser = parse({ delimiter: "," });
+  parser;
   dataArray = [];
+  totalCounter = 0;
+  counter = 0;
+  table;
+  pgp = pgPromise();
+  db;
 
-  constructor() {
-    this.parser.on("readable", () => {
+  constructor(config, columns) {
+    this.parser = parse({ columns: columns, delimiter: ",", from: 2 });
+    this.db = this.pgp(config);
+
+    this.parser.on("readable", async () => {
       let data;
       while ((data = this.parser.read()) !== null) {
         this.dataArray.push(data);
+        this.counter++;
+        this.totalCounter++;
+        if (this.counter === 10000) {
+          const insertString = this.pgp.helpers
+            .insert(this.dataArray, this.table.columns, this.table.table)
+            .replace("'Unknown'", "NULL");
+          this.counter = 0;
+          this.dataArray = [];
+          console.log(this.totalCounter);
+          await this.db.none(insertString + " ON CONFLICT DO NOTHING");
+        }
       }
     });
 
@@ -17,7 +37,14 @@ export class CsvToArray {
       console.log(err);
     });
 
-    this.parser.on("end", () => {
+    this.parser.on("end", async () => {
+      if (this.dataArray.length > 0) {
+        let insertString = this.pgp.helpers
+          .insert(this.dataArray, this.table.columns, this.table.table)
+          .replaceAll(`'Unknown'`, "NULL");
+
+        await this.db.none(insertString + " ON CONFLICT DO NOTHING");
+      }
       console.log("Parsing Done");
     });
   }
@@ -31,7 +58,8 @@ export class CsvToArray {
    * @param {String} fileName
    * @returns {Promise} Promise Resolving into array
    */
-  read = async (fileName) => {
+  read = async (fileName, table) => {
+    this.table = table;
     return new Promise((resolve, reject) => {
       try {
         createReadStream(fileName)
