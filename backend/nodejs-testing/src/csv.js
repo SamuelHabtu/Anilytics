@@ -2,7 +2,7 @@ import { parse } from "csv-parse";
 import { createReadStream } from "node:fs";
 import pgPromise from "pg-promise";
 
-export class CsvToArray {
+export default class CsvToPostgres {
   parser;
   dataArray = [];
   totalCounter = 0;
@@ -10,43 +10,14 @@ export class CsvToArray {
   table;
   pgp = pgPromise();
   db;
+  columns;
 
-  constructor(config, columns) {
-    this.parser = parse({ columns: columns, delimiter: ",", from: 2 });
+  /**
+   *
+   * @param {*} config - Database config
+   */
+  constructor(config) {
     this.db = this.pgp(config);
-
-    this.parser.on("readable", async () => {
-      let data;
-      while ((data = this.parser.read()) !== null) {
-        this.dataArray.push(data);
-        this.counter++;
-        this.totalCounter++;
-        if (this.counter === 10000) {
-          const insertString = this.pgp.helpers
-            .insert(this.dataArray, this.table.columns, this.table.table)
-            .replace("'Unknown'", "NULL");
-          this.counter = 0;
-          this.dataArray = [];
-          console.log(this.totalCounter);
-          await this.db.none(insertString + " ON CONFLICT DO NOTHING");
-        }
-      }
-    });
-
-    this.parser.on("error", (err) => {
-      console.log(err);
-    });
-
-    this.parser.on("end", async () => {
-      if (this.dataArray.length > 0) {
-        let insertString = this.pgp.helpers
-          .insert(this.dataArray, this.table.columns, this.table.table)
-          .replaceAll(`'Unknown'`, "NULL");
-
-        await this.db.none(insertString + " ON CONFLICT DO NOTHING");
-      }
-      console.log("Parsing Done");
-    });
   }
 
   get dataArray() {
@@ -54,12 +25,22 @@ export class CsvToArray {
   }
 
   /**
-   * Takes in a csv filename and puts data into an array
-   * @param {String} fileName
+   * Takes in a csv filename and inserts each row into the Postgres table
+   * @param {String} fileName - Name of CSV
+   * @param {Object} table - Table with column and table name in db
+   * @param {Number} start - row to start, default 2
    * @returns {Promise} Promise Resolving into array
    */
-  read = async (fileName, table) => {
+  read = async (fileName, table, start) => {
+    this.parser = parse({
+      columns: table.columns,
+      delimiter: ",",
+      from: start ? start : 2,
+    });
+
     this.table = table;
+    this.setCsvParser();
+
     return new Promise((resolve, reject) => {
       try {
         createReadStream(fileName)
@@ -76,10 +57,49 @@ export class CsvToArray {
   };
 
   /**
-   * Clears object array
+   * Sets listeners for parser
+   * 'readable' - when parser is passed csv data
+   * 'error' - when parser errors
+   * 'end' - happens when parser reaches end
    */
-  clear = () => {
-    this.dataArray = [];
+  setCsvParser = () => {
+    this.parser.on("readable", async () => {
+      let data;
+      while ((data = this.parser.read()) !== null) {
+        this.dataArray.push(data);
+        this.counter++;
+        this.totalCounter++;
+
+        if (this.counter === 10000) {
+          const insertString = this.pgp.helpers
+            .insert(this.dataArray, this.table.columns, this.table.table)
+            .replaceAll(`'Unknown'`, "NULL");
+          this.counter = 0;
+          this.dataArray = [];
+          console.log(this.totalCounter);
+          await this.db.none(insertString + " ON CONFLICT DO NOTHING");
+        }
+      }
+    });
+
+    this.parser.on("error", (err) => {
+      console.log(err);
+    });
+
+    this.parser.on("end", async () => {
+      // Inserts remaining data
+      if (this.dataArray.length > 0) {
+        console.log(this.totalCounter);
+        let insertString = this.pgp.helpers
+          .insert(this.dataArray, this.table.columns, this.table.table)
+          .replaceAll(`'Unknown'`, "NULL");
+        await this.db.none(insertString + " ON CONFLICT DO NOTHING");
+      }
+      this.counter = 0;
+      this.totalCounter = 0;
+      this.dataArray = [];
+      console.log("Parsing Done");
+    });
   };
 }
 

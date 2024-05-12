@@ -1,7 +1,4 @@
-import express from "express";
-import cors from "cors";
-import morgan from "morgan";
-import { CsvToArray } from "./src/csv.js";
+import CsvToPostgres from "./src/csv.js";
 import dotenv from "dotenv";
 import {
   watching_status,
@@ -19,32 +16,14 @@ const config = {
   database: process.env.DB,
 };
 
-const parser = new CsvToArray(config, animelist.columns);
+const parser = new CsvToPostgres(config);
 
+// Uncomment one at a time and run, still need to fix so all can be run sequentially, something with promises
 try {
+  // await parser.read("../data/watching_status.csv", watching_status);
+  // await parser.read("../data/anime.csv", anime);
+  // await parser.read("../data/rating_complete.csv", rating_complete);
   // await parser.read("../data/animelist.csv", animelist);
 } catch (e) {
   console.log(e);
 }
-
-// console.log(insertString.replace(`'Unknown'`, "NULL"));
-// var app = express();
-// const router = express.Router();
-
-// app.use(morgan("dev"));
-// app.use(express.json()); //body parsing
-// app.use(express.urlencoded({ extended: true })); //query string
-// app.use(
-//   cors({
-//     origin: ["http://localhost:5173"],
-//     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-//   })
-// );
-
-// app.use(router.get("/"), (req, res) => {
-//   res.status(200).send("Recieved");
-// });
-
-// app.listen(process.env.PORT, () => {
-//   console.log(`server listening on port ${process.env.PORT}`);
-// });
