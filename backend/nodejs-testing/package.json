@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@batec2/csvtodb": "^1.0.3",
     "cors": "^2.8.5",
     "csv-parse": "^5.5.5",
     "dotenv": "^16.4.5",
