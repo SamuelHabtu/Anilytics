@@ -4,11 +4,9 @@ Anilytics is a project that uses a combination of collaborative filtering and co
 
 ### Prerequisites
 
-Animatch is written in Python, and it requires the following dependencies to be installed on your system:
+Anilytics is written in Python, and it requires the following dependencies to be installed on your system:
 
 - NumPy
-- Pandas
-- TensorFlow
 - Scikit-Learn
 
 ## Installation
