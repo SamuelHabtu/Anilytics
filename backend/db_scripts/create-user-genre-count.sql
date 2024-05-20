@@ -44,6 +44,7 @@ CREATE TABLE user_genre_count(
   Demons INT DEFAULT 0
 );
 
+-- Dont run
 -- ADDS users to table
 INSERT INTO user_genre_count
 SELECT DISTINCT user_id from animelist;
