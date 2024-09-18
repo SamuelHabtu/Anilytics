@@ -19,19 +19,6 @@ const config = {
   database: process.env.DB,
 };
 
-// const parser = new CsvToDb(config);
-
-// Uncomment one at a time and run, still need to fix so all can be run sequentially, something with promises
-try {
-  // await parser.read("../data/watching_status.csv", watching_status);
-  // await parser.read("../data/anime.csv", anime);
-  // await parser.read("../data/rating_complete.csv", rating_complete);
-  // await parser.read("../data/animelist.csv", animelist);
-  // await create_user_genre_count()
-} catch (e) {
-  console.log(e);
-}
-
 const create_user_genre_count = async () => {
   const pgp = pgPromise();
   const db = pgp(config);
@@ -152,3 +139,16 @@ const create_user_genre_count = async () => {
     console.log(e);
   }
 };
+
+// const parser = new CsvToDb(config);
+
+// Uncomment one at a time and run, still need to fix so all can be run sequentially, something with promises
+try {
+  // await parser.read("./data/watching_status.csv", watching_status);
+  // await parser.read("./data/anime.csv", anime);
+  // await parser.read("./data/rating_complete.csv", rating_complete);
+  // await parser.read("./data/animelist.csv", animelist);
+  await create_user_genre_count();
+} catch (e) {
+  console.log(e);
+}
