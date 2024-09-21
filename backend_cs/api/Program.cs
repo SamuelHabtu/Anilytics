@@ -5,8 +5,6 @@ var app = builder.Build();
 
 PostGresDriver db = new PostGresDriver("localhost","postgres","dev","anilytics");
 
-app.MapGet("/", async () => {
-    return db.read();
-});
+app.MapGet("/", async () => "hey");
 
 app.Run();
