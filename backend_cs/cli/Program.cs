@@ -8,10 +8,10 @@ class Program
 
         AnilyticsContext context = new AnilyticsContext();
 
-        var anime = context.Animes.Where(a => a.AnimeId == 40632);
+        var anime = context.Animes.Take(10);
         foreach (Anime show in anime)
         {
-            Console.WriteLine(show);
+            Console.WriteLine(show.ToString());
         }
     }
 }

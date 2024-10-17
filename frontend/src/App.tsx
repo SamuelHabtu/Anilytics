@@ -1,39 +1,14 @@
 import "./App.css";
-import axios from "axios";
-import { useState } from "react";
+import { ThemeProvider } from "./components/theme-provider";
+import { Button } from "./components/ui/button";
 
 function App() {
-  const [currentToken, setToken] = useState();
-  const testApi = async () => {
-    // const data = await axios.get("http://localhost:9090");
-    try {
-      const data = await axios.get(
-        " https://myanimelist.net/v1/oauth2/authorize",
-        {
-          headers: {
-            // "Access-Control-Allow-Origin": "*",
-            //   "Access-Control-Allow-Methods":
-            //     "GET, POST, PATCH, PUT, DELETE, OPTIONS",
-            //   "Access-Control-Allow-Headers": "Origin",
-          },
-
-          params: {
-            client_id: import.meta.env.VITE_CLIENT_ID,
-            state: "State1",
-            code_challenge: import.meta.env.VITE_CRYPTO_CHALLENGE,
-            response_type: import.meta.env.VITE_RESPONSE_TYPE,
-          },
-        }
-      );
-      console.log(data);
-    } catch (e) {
-      console.log(e);
-    }
-  };
   return (
-    <>
-      <button onClick={() => testApi()}>Press Me</button>
-    </>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <>
+        <Button variant={"destructive"}>Button</Button>
+      </>
+    </ThemeProvider>
   );
 }
 
